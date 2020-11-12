@@ -23,9 +23,10 @@ const u32 VIF_BUFFER_SIZE = 48 * 1024;
 typedef struct VU1BuildList
 {
     u8 isBuilding;
-    void *offset;
+    char *offset;
     void *kickBuffer;
     u32 dmaSize;
+    u32 ptr;
     u32 dmaSizeAll;
     u32 dmaDestination;
 } VU1BuildList;
@@ -61,7 +62,7 @@ private:
     VU1BuildList buildList;
     char dmaBuffer1[VIF_BUFFER_SIZE] __attribute__((aligned(16)));
     char dmaBuffer2[VIF_BUFFER_SIZE] __attribute__((aligned(16)));
-    void *currentBuffer;
+    char *currentBuffer;
     u32 switchBuffer;
     static u32 countProgramSize(u32 *t_start, u32 *t_end);
     void checkList();
