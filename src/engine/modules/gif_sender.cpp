@@ -186,8 +186,9 @@ void GifSender::calc3DObject(Matrix t_perspective, Mesh &t_mesh, u32 vertexCount
     if (SHOULD_BE_LIGHTED)
         create_local_light(localLight, rotation);
 
-    // I cant put perspective from renderData here. ee-gcc bug?
-    create_local_screen(localScreen, localWorld, t_renderData->worldView->data, t_perspective.data);
+    // GCC 3.2.3: I cant put perspective from renderData here. ee-gcc bug?
+    // GCC 9: I cant put perspective from t_perspective here. ee-gcc bug?
+    create_local_screen(localScreen, localWorld, t_renderData->worldView->data, t_renderData->perspective->data);
 
     if (SHOULD_BE_LIGHTED)
     {
