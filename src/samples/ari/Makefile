@@ -25,12 +25,12 @@ EE_OBJS =											\
 	../../engine/loaders/dff_loader.o				\
 	../../engine/loaders/md2_loader.o				\
 	../../engine/loaders/obj_loader.o				\
-	../../engine/vu1_progs/draw3D.o					\
 	../../engine/engine.o							\
 	camera.o										\
 	objects/player.o								\
 	ari.o											\
 	main.o
+	# ../../engine/vu1_progs/draw3D.o					\
 
 EE_LIBS = -ldraw -lgraph -lmath3d -lpacket -ldma -lpad -laudsrv -lc -lstdc++
 EE_INCS := -I./../../engine/include $(EE_INCS)

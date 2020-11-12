@@ -39,19 +39,19 @@ void Ari::onInit()
 
     texRepo = engine->renderer->getTextureRepository();
 
-    island.loadDff("sunnyisl/", "sunnyisl", 0.1F, false);
-    island.rotation.x = -1.6F;
-    island.position.set(0.0F, 10.0F, 20.0F);
-    island.shouldBeBackfaceCulled = true;
-    island.shouldBeFrustumCulled = false;
+    // island.loadDff("sunnyisl/", "sunnyisl", 0.1F, false);
+    // island.rotation.x = -1.6F;
+    // island.position.set(0.0F, 10.0F, 20.0F);
+    // island.shouldBeBackfaceCulled = true;
+    // island.shouldBeFrustumCulled = false;
 
-    islandAddons.loadDff("sunnyisl/", "sunnyisl3", 0.1F, false);
-    islandAddons.shouldBeBackfaceCulled = true;
-    islandAddons.rotation.x = -1.6F;
-    islandAddons.position.set(0.0F, 10.0F, 20.0F);
+    // islandAddons.loadDff("sunnyisl/", "sunnyisl3", 0.1F, false);
+    // islandAddons.shouldBeBackfaceCulled = true;
+    // islandAddons.rotation.x = -1.6F;
+    // islandAddons.position.set(0.0F, 10.0F, 20.0F);
 
-    // skybox.loadObj("skybox/", "skybox", 100.0F, false);
-    // skybox.shouldBeFrustumCulled = false;
+    skybox.loadObj("skybox/", "skybox", 100.0F, false);
+    skybox.shouldBeFrustumCulled = false;
 
     // waterFloors[0].loadObj("water/", "water", 5.0F, false);
     // waterFloors[0].position.set(0.0F, 8.0F, 0.0F);
@@ -71,14 +71,15 @@ void Ari::onInit()
     //         ->addLink(waterFloors[i].getId(), waterFloors[i].getMaterial(0).getId());
     // }
 
-    texRepo->addByMesh("sunnyisl/", island);
+    // texRepo->addByMesh("sunnyisl/", island);
     // texRepo->addByMesh("sunnyisl/", islandAddons);
 
-    // texRepo->addByMesh("skybox/", skybox);
+    texRepo->addByMesh("skybox/", skybox);
 
     // texRepo->addByMesh("ari/", player.mesh);
 
-    // engine->audio.play();
+    engine->audio.play();
+    printf("Hello GCC9!\n");
 }
 
 void Ari::initBulb()
@@ -92,8 +93,8 @@ void Ari::onUpdate()
     if (engine->pad.isCrossClicked)
         printf("FPS:%f\n", engine->fps);
     camera.update(engine->pad, player.mesh);
-    // engine->renderer->draw(skybox);
-    engine->renderer->draw(island);
+    engine->renderer->drawByPath3(skybox);
+    // engine->renderer->drawByPath3(island);
     // engine->renderer->draw(islandAddons);
     // engine->renderer->draw(player.mesh);
     // for (u8 i = 0; i < WATER_TILES_COUNT; i++)

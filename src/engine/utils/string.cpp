@@ -12,6 +12,8 @@
 #include "../include/utils/debug.hpp"
 #include <stdio.h>
 
+#define CHAR_BIT 8
+
 char *String::createU32ToString(u32 a)
 {
     char *result = new char[(((sizeof a) * CHAR_BIT) + 2) / 3 + 2];
