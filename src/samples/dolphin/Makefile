@@ -1,15 +1,11 @@
-EE_BIN = floors.elf
+EE_BIN = dolphin.elf
 
 TYRA_DIR = ./../../engine
 
 EE_OBJS =											\
-	managers/light_manager.o						\
-	managers/floor_manager.o						\
 	camera.o										\
-	objects/floor.o									\
 	objects/player.o								\
-	utils.o											\
-	floors.o										\
+	dolphin.o										\
 	main.o
 
 EE_LIBS = -ltyra 

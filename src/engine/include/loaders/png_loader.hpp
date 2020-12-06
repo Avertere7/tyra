@@ -8,26 +8,22 @@
 # Sandro Sobczyński <sandro.sobczynski@gmail.com>
 */
 
-#ifndef _TYRA_TIMER_
-#define _TYRA_TIMER_
+#ifndef _TYRA_PNG_LOADER_
+#define _TYRA_BMP_LOADER_
 
+#include <stdio.h>
 #include <tamtypes.h>
-#include <timer.h>
+#include "../models/texture.hpp"
 
-/** Class responsible for fps counting */
-class Timer
+/** Class responsible for loading images in bmp format */
+class PngLoader
 {
 
 public:
-    Timer();
-    ~Timer();
+    PngLoader();
+    ~PngLoader();
 
-    u32 getTimeDelta();
-    inline void prime() { lastTime = *T3_COUNT; }
-    float getFPS();
-
-private:
-    u32 lastTime, time, change;
+    void load(Texture &o_texture, char *t_subfolder, char *t_name, char *t_extension);
 };
 
 #endif

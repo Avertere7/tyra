@@ -40,10 +40,11 @@ Renderer::Renderer(u32 t_packetSize, ScreenSettings *t_screen)
     isVSyncEnabled = true;
     isFrameEmpty = false;
     lastTextureId = 0;
-    flipPacket = packet_init(3, PACKET_UCAB); // Uncached accelerated
+    flipPacket = packet2_create(4, P2_TYPE_UNCACHED_ACCL, P2_MODE_NORMAL, 0);
     allocateBuffers(t_screen->width, t_screen->height);
     initDrawingEnv(t_screen->width, t_screen->height);
     setPrim();
+    screen = t_screen;
     gifSender = new GifSender(t_packetSize, t_screen);
     vifSender = new VifSender();
     perspective.setPerspective(*t_screen);
@@ -58,16 +59,16 @@ Renderer::~Renderer() {}
 // ----
 
 /** Configure and allocate vRAM for texture buffer */
-void Renderer::allocateTextureBuffer(u16 t_width, u16 t_height)
+void Renderer::allocateTextureBuffer(Texture *t_texture)
 {
-    textureBuffer.width = t_width;
-    textureBuffer.psm = GS_PSM_24;
-    textureBuffer.address = graph_vram_allocate(t_width, t_height, GS_PSM_24, GRAPH_ALIGN_BLOCK);
+    textureBuffer.width = t_texture->getWidth();
+    textureBuffer.psm = t_texture->getType();
+    textureBuffer.info.components = textureBuffer.psm == TEX_TYPE_RGBA ? TEXTURE_COMPONENTS_RGBA : TEXTURE_COMPONENTS_RGB;
+    textureBuffer.address = graph_vram_allocate(t_texture->getWidth(), t_texture->getHeight(), textureBuffer.psm, GRAPH_ALIGN_BLOCK);
     if (textureBuffer.address <= 1)
         PRINT_ERR("Texture buffer allocation error. No memory!");
-    textureBuffer.info.width = draw_log2(t_width);
-    textureBuffer.info.height = draw_log2(t_height);
-    textureBuffer.info.components = TEXTURE_COMPONENTS_RGB;
+    textureBuffer.info.width = draw_log2(t_texture->getWidth());
+    textureBuffer.info.height = draw_log2(t_texture->getHeight());
     textureBuffer.info.function = TEXTURE_FUNCTION_MODULATE;
     isTextureVRAMAllocated = true;
 }
@@ -82,39 +83,80 @@ void Renderer::deallocateTextureBuffer()
     }
 }
 
-void Renderer::changeTexture(const Mesh &t_mesh, u32 t_materialId)
+void Renderer::changeTexture(Texture *t_tex)
 {
-
-    MeshTexture *tex = textureRepo.getByMesh(t_mesh.getId(), t_materialId);
-    if (tex != NULL)
+    if (t_tex != NULL)
     {
-        if (tex->getId() != lastTextureId)
+        if (t_tex->getId() != lastTextureId)
         {
-            lastTextureId = tex->getId();
+            lastTextureId = t_tex->getId();
             deallocateTextureBuffer();
-            allocateTextureBuffer(tex->getWidth(), tex->getHeight());
-            GifSender::sendTexture(*tex, &textureBuffer);
+            allocateTextureBuffer(t_tex);
+            GifSender::sendTexture(*t_tex, &textureBuffer);
         }
     }
     else
         PRINT_ERR("Texture was not found in texture repository!");
 }
 
+void Renderer::draw(Sprite &t_sprite)
+{
+    texrect_t rect;
+    float texMax = t_sprite.size.x > t_sprite.size.y ? t_sprite.size.x : t_sprite.size.y;
+    float texS = texMax;
+    float texT = texMax;
+    if (t_sprite.size.x > t_sprite.size.y)
+        texT = texMax / (t_sprite.size.x / t_sprite.size.y);
+    else if (t_sprite.size.y > t_sprite.size.x)
+        texS = texMax / (t_sprite.size.y / t_sprite.size.x);
+    rect.t0.s = t_sprite.isFlippedHorizontally() ? texS : 0.0F;
+    rect.t0.t = t_sprite.isFlippedVertically() ? texT : 0.0F;
+    rect.t1.s = t_sprite.isFlippedHorizontally() ? 0.0F : texS;
+    rect.t1.t = t_sprite.isFlippedVertically() ? 0.0F : texT;
+    rect.color.r = t_sprite.color.r;
+    rect.color.g = t_sprite.color.g;
+    rect.color.b = t_sprite.color.b;
+    rect.color.a = t_sprite.color.a;
+    rect.color.q = 0;
+    rect.v0.x = t_sprite.position.x;
+    rect.v0.y = t_sprite.position.y;
+    rect.v0.z = (u32)-1;
+    rect.v1.x = (t_sprite.size.x * t_sprite.scale) + t_sprite.position.x;
+    rect.v1.y = (t_sprite.size.y * t_sprite.scale) + t_sprite.position.y;
+    rect.v1.z = (u32)-1;
+    beginFrameIfNeeded();
+    changeTexture(textureRepo.getBySprite(t_sprite.getId()));
+    packet2_t *packet2 = packet2_create(12, P2_TYPE_NORMAL, P2_MODE_NORMAL, 0);
+    packet2_update(packet2, draw_primitive_xyoffset(packet2->next, 0, 2048, 2048));
+    packet2_utils_gif_add_set(packet2, 1);
+    packet2_utils_gs_add_texbuff_clut(packet2, &textureBuffer, &t_sprite.clut);
+    draw_enable_blending();
+    packet2_update(packet2, draw_rect_textured(packet2->next, 0, &rect));
+    packet2_update(packet2,
+                   draw_primitive_xyoffset(
+                       packet2->next,
+                       0,
+                       (2048 - (screen->width / 2)), (2048 - (screen->height / 2))));
+    draw_disable_blending();
+    packet2_update(packet2, draw_finish(packet2->next));
+    dma_channel_wait(DMA_CHANNEL_GIF, 0);
+    dma_channel_send_packet2(packet2, DMA_CHANNEL_GIF, true);
+    packet2_free(packet2);
+}
+
 /** Initializes drawing environment (1st app packet) */
 void Renderer::initDrawingEnv(float t_screenW, float t_screenH)
 {
     PRINT_LOG("Initializing drawing environment");
-    packet_t *packet = packet_init(20, PACKET_NORMAL);
     u16 halfW = (u16)t_screenW / 2;
     u16 halfH = (u16)t_screenH / 2;
-    qword_t *q = packet->data; // Generic qword pointer.
-    q = draw_setup_environment(q, 0, frameBuffers, &(zBuffer));
-    q = draw_primitive_xyoffset(q, 0, (2048 - halfW), (2048 - halfH));
-    q = draw_finish(q);
-    // Now send the packet, no need to wait since it's the first.
-    dma_channel_send_normal(DMA_CHANNEL_GIF, packet->data, q - packet->data, 0, 0);
-    dma_wait_fast();
-    packet_free(packet);
+    packet2_t *packet2 = packet2_create(20, P2_TYPE_NORMAL, P2_MODE_NORMAL, 0);
+    packet2_update(packet2, draw_setup_environment(packet2->base, 0, frameBuffers, &(zBuffer)));
+    packet2_update(packet2, draw_primitive_xyoffset(packet2->next, 0, (2048 - halfW), (2048 - halfH)));
+    packet2_update(packet2, draw_finish(packet2->next));
+    dma_channel_send_packet2(packet2, DMA_CHANNEL_GIF, true);
+    dma_channel_wait(DMA_CHANNEL_GIF, 0);
+    packet2_free(packet2);
     PRINT_LOG("Drawing environment initialized!");
 }
 
@@ -178,7 +220,8 @@ void Renderer::drawByPath3(Mesh &t_mesh, LightBulb *t_bulbs, u16 t_bulbsCount)
     {
         if (t_mesh.shouldBeFrustumCulled && !t_mesh.getMaterial(i).isInFrustum(renderData.frustumPlanes, t_mesh.position))
             return;
-        changeTexture(t_mesh, t_mesh.getMaterial(i).getId());
+        Texture *tex = textureRepo.getByMesh(t_mesh.getId(), t_mesh.getMaterial(i).getId());
+        changeTexture(tex);
         gifSender->initPacket(context);
         u32 vertCount = t_mesh.getMaterial(i).getFacesCount();
         VECTOR *vertices = new VECTOR[vertCount];
@@ -225,7 +268,8 @@ void Renderer::draw(Mesh &t_mesh, LightBulb *t_bulbs, u16 t_bulbsCount)
         VECTOR __attribute__((aligned(16))) vertices[vertCount];
         VECTOR __attribute__((aligned(16))) normals[vertCount];
         VECTOR __attribute__((aligned(16))) coordinates[vertCount];
-        changeTexture(t_mesh, t_mesh.getMaterial(i).getId());
+        Texture *tex = textureRepo.getByMesh(t_mesh.getId(), t_mesh.getMaterial(i).getId());
+        changeTexture(tex);
         vertCount = t_mesh.getDrawData(i, vertices, normals, coordinates, rotatedCamera);
         vifSender->drawMesh(&renderData, perspective, vertCount, vertices, normals, coordinates, t_mesh, t_bulbs, t_bulbsCount, &textureBuffer);
     }
@@ -277,10 +321,8 @@ void Renderer::flipBuffers()
         0);
     context ^= 1;
     isFrameEmpty = 1;
-    qword_t *q = flipPacket->data;
-    q = draw_framebuffer(q, 0, &frameBuffers[context]);
-    q = draw_finish(q);
-    dma_wait_fast();
-    dma_channel_send_normal_ucab(DMA_CHANNEL_GIF, flipPacket->data, q - flipPacket->data, 0);
+    packet2_update(flipPacket, draw_framebuffer(flipPacket->base, 0, &frameBuffers[context]));
+    packet2_update(flipPacket, draw_finish(flipPacket->next));
+    dma_channel_send_packet2(flipPacket, DMA_CHANNEL_GIF, true);
     draw_wait_finish();
 }

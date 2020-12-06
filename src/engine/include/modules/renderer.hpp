@@ -13,10 +13,11 @@
 
 #include <draw_buffers.h>
 #include <draw_primitives.h>
-#include <packet.h>
+#include <packet2.h>
 #include "gif_sender.hpp"
 #include "vif_sender.hpp"
 #include "../models/math/plane.hpp"
+#include "../models/sprite.hpp"
 #include "../models/screen_settings.hpp"
 #include "../models/render_data.hpp"
 #include "./texture_repository.hpp"
@@ -38,6 +39,8 @@ public:
     void disableVSync() { isVSyncEnabled = false; }
 
     /// --- Draw: PATH3
+
+    void draw(Sprite &t_sprite);
 
     /** 
      * Draw many meshes with lighting information.
@@ -104,11 +107,11 @@ public:
     TextureRepository *getTextureRepository() { return &textureRepo; };
 
 private:
-    void changeTexture(const Mesh &t_mesh, u32 t_materialId);
+    void changeTexture(Texture *t_tex);
     u32 lastTextureId;
     texbuffer_t textureBuffer;
     u8 isTextureVRAMAllocated, isVSyncEnabled;
-    void allocateTextureBuffer(u16 t_width, u16 t_height);
+    void allocateTextureBuffer(Texture *t_texture);
     void deallocateTextureBuffer();
     void flipBuffers();
     void beginFrameIfNeeded();
@@ -116,9 +119,10 @@ private:
     Matrix perspective;
     RenderData renderData;
     TextureRepository textureRepo;
+    ScreenSettings *screen;
     GifSender *gifSender;
     VifSender *vifSender;
-    packet_t *flipPacket;
+    packet2_t *flipPacket;
     void allocateBuffers(float t_screenW, float t_screenH);
     void initDrawingEnv(float t_screenW, float t_screenH);
     void setPrim();

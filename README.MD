@@ -1,23 +1,24 @@
-[![Contributors][contributors-shield]][contributors-url]  
-[![MIT License][license-shield]][license-url] 
+[![Contributors][contributors-shield]][contributors-url]
+[![MIT License][license-shield]][license-url]  
+PS2-Scene [![Discord](https://img.shields.io/discord/652861436992946216?logo=discord)](https://discord.gg/7dCr6ThSN5)
 
 <br />
 <p align="center">
-  <a href="https://github.com/ps2-tyra/tyra">
+  <a href="https://github.com/h4570/tyra">
     <img src="http://allvectorlogo.com/img/2016/05/ps2-logo.png" alt="Logo" width="230" height="125">
   </a>
 
   <h3 align="center">Tyra alpha 1.1.0</h3>
 
   <p align="center">
-    First open source renderer and game engine for PS2 (PlayStation 2™).
+    Open source renderer and game engine for PS2 (PlayStation 2™).
     <br />
     <a href="https://www.youtube.com/"><strong>View Demo (soon) »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/ps2-tyra/tyra/issues">Report Bug</a>
+    <a href="https://github.com/h4570/tyra/issues">Report Bug</a>
     ·
-    <a href="https://github.com/ps2-tyra/tyra/issues">Request Feature</a>
+    <a href="https://github.com/h4570/tyra/issues">Request Feature</a>
   </p>
 </p>  
 
@@ -43,11 +44,11 @@
 <img src="http://apgcglz.cluster028.hosting.ovh.net/tyra/1.1.0/tyra.gif" alt="sample" width="600" height="auto">
 
 ### Samples
-* [Floors](https://github.com/ps2-tyra/tyra/tree/master/src/samples/floors) 
-* [Ari (WIP)](https://github.com/ps2-tyra/tyra/tree/master/src/samples/ari) 
+* [Floors](https://github.com/h4570/tyra/tree/master/src/samples/floors) 
+* [Ari (WIP)](https://github.com/h4570/tyra/tree/master/src/samples/ari) 
 
 ### Contributors wanted
-#### I will be grateful for any help, Discord: Sandro#3402  
+#### I will be grateful for any help, Discord: h4570#3402  
   
 ### About project
 Goal of Tyra project is to provide simple API for PS2 (PlayStation 2™) game creation. So you can just run PS2 emulator, grab your .obj file, and put it into live in a seconds. Project is on early stage, so a lot of stuff is changing from release to release.  
@@ -91,7 +92,7 @@ YouTube tutorials soon!
 
 This is an example of how to list things you need to use the software and how to install them.  
 * PS2 DEV environment - [PS2DEV](https://github.com/ps2dev/ps2dev)  
-* At least #1a4587d PS2SDK - [PS2SDK](https://github.com/ps2dev/ps2sdk) 
+* At least #674b6f4 PS2SDK (01.12.2020) - [PS2SDK](https://github.com/ps2dev/ps2sdk) 
 * PS2 Emulator. For example [PCSX2](https://pcsx2.net/) 
 
 ### Installation  
@@ -113,10 +114,10 @@ make
 ## Roadmap  
 
 ### Roadmap moved to github kanban:  
-[https://github.com/ps2-tyra/tyra/projects/1](https://github.com/ps2-tyra/tyra/projects/1)  
+[https://github.com/h4570/tyra/projects/1](https://github.com/ps2-tyra/tyra/projects/1)  
 
 
-See the [open issues](https://github.com/ps2-tyra/tyra/issues) for a list of proposed features (and known issues). 
+See the [open issues](https://github.com/h4570/tyra/issues) for a list of proposed features (and known issues). 
 
 ## Contributing 
 
@@ -147,7 +148,7 @@ Without these guys, everything would be harder:
 * Whole PS2SDK/PS2Scene team
 * And so many other guys. Thanks!
 
-Project Link: [https://github.com/ps2-tyra/tyra](https://github.com/ps2-tyra/tyra)  
+Project Link: [https://github.com/h4570/tyra](https://github.com/h4570/tyra)  
 
 [contributors-shield]: https://img.shields.io/github/contributors/ps2-tyra/tyra.svg?style=flat-square  
 [contributors-url]: https://github.com/ps2-tyra/tyra/graphs/contributors 
