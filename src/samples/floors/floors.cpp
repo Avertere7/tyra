@@ -54,6 +54,9 @@ void Floors::onInit()
 
 void Floors::onUpdate()
 {
+    if (engine->pad.isCrossClicked)
+        printf("FPS:%f\n", engine->fps);
+
     ui->update(player);
     lightManager.update();
     camera.update(engine->pad, player.mesh);
