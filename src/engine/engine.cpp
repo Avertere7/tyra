@@ -76,7 +76,7 @@ void Engine::wakeup(s32 t_alarmId, u16 t_time, void *t_common)
 void Engine::firePS2()
 {
     SifInitRpc(0);
-    // srand(time(NULL));
+    srand(time(NULL));
     fileService.startThread();
     audio.startThread(&fileService);
     isInitialized = 0;
