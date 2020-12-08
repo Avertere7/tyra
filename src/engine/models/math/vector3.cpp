@@ -136,11 +136,11 @@ Vector3 Vector3::operator*(const float &t)
 void Vector3::operator*=(const float &t)
 {
     asm volatile(
-        "lqc2       vf4, 0x0(%0)  \n\t"
+        "lqc2       $vf4, 0x0(%0)  \n\t"
         "mfc1       $8,  %1       \n\t"
-        "qmtc2      $8,  vf5      \n\t"
-        "vmulx.xyz  vf4, vf4, vf5 \n\t"
-        "sqc2       vf4, 0x0(%0)  \n\t"
+        "qmtc2      $8,  $vf5      \n\t"
+        "vmulx.xyz  $vf4, $vf4, $vf5 \n\t"
+        "sqc2       $vf4, 0x0(%0)  \n\t"
         :
         : "r"(this->xyz), "f"(t));
 }

@@ -61,7 +61,8 @@ void Floors::onUpdate()
     engine->renderer->draw(player->mesh);
     engine->renderer->draw(enemy->getMeshes(), enemy->getMeshesCount());
     for (u16 i = 0; i < FLOORS_COUNT; i++)
-        engine->renderer->drawByPath3(floorManager->floors[i].mesh, lightManager.bulbs, lightManager.bulbsCount);
+        engine->renderer->draw(floorManager->floors[i].mesh, lightManager.bulbs, lightManager.bulbsCount);
+    // engine->renderer->drawByPath3(floorManager->floors[i].mesh, lightManager.bulbs, lightManager.bulbsCount);
     ui->render(engine->renderer); // 2D rendering ist LAST step, because layers gonna play there.
 }
 
