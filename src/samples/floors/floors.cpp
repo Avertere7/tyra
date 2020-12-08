@@ -52,15 +52,8 @@ void Floors::onInit()
 
 void Floors::onUpdate()
 {
-<<<<<<< HEAD
-    if (engine->pad.isCrossClicked)
-        printf("FPS:%f\n", engine->fps);
-
-    ui->update(player);
-=======
     ui->update(*player);
     enemy->update(*floorManager);
->>>>>>> develop
     lightManager.update();
     camera.update(engine->pad, player->mesh);
     floorManager->update(*player);
