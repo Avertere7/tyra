@@ -12,6 +12,7 @@
 
 #include <utils/math.hpp>
 #include <utils/debug.hpp>
+#include <stdlib.h>
 
 // ----
 // Constructors/Destructors
