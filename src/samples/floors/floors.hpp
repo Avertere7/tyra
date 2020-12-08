@@ -37,12 +37,13 @@ public:
     Engine *engine;
 
 private:
+    void setBgColorAndAmbientColor();
     u32 audioTicks;
     u8 skip1Beat;
     TextureRepository *texRepo;
     LightManager lightManager;
-    FloorManager floorManager;
-    Player player;
+    FloorManager *floorManager;
+    Player *player;
     Camera camera;
     Ui *ui;
     Enemy *enemy;

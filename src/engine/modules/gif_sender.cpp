@@ -12,7 +12,6 @@
 
 #include "../include/utils/math.hpp"
 #include "../include/utils/debug.hpp"
-#include "../include/modules/light.hpp"
 #include <packet2_chain.h>
 #include <kernel.h>
 #include <dma.h>
@@ -29,9 +28,10 @@
 /** Initializes vars and creates data transfer packets
  * @param packetSize Size of data packet, should be increased when more data will be rendered
  */
-GifSender::GifSender(u32 t_packetSize, ScreenSettings *t_screen) : screen(t_screen)
+GifSender::GifSender(u32 t_packetSize, ScreenSettings *t_screen, Light *t_light) : screen(t_screen)
 {
     PRINT_LOG("Initializing GifSender");
+    light = t_light;
     packetSize = t_packetSize;
     packets[0] = packet2_create(t_packetSize, P2_TYPE_NORMAL, P2_MODE_CHAIN, false);
     packets[1] = packet2_create(t_packetSize, P2_TYPE_NORMAL, P2_MODE_CHAIN, false);
@@ -76,7 +76,7 @@ void GifSender::sendTexture(Texture &texture, texbuffer_t *t_texBuffer)
     packet2_free(packet2);
 }
 
-void GifSender::sendClear(zbuffer_t *t_zBuffer)
+void GifSender::sendClear(zbuffer_t *t_zBuffer, color_t *t_rgb)
 {
     packet2_t *packet2 = packet2_create(36, P2_TYPE_NORMAL, P2_MODE_CHAIN, false);
     packet2_chain_open_end(packet2, 0, 0);
@@ -84,7 +84,7 @@ void GifSender::sendClear(zbuffer_t *t_zBuffer)
     packet2_update(packet2, draw_clear(packet2->next, 0,
                                        2048.0F - (screen->width / 2), 2048.0F - (screen->height / 2),
                                        screen->width, screen->height,
-                                       0x10, 0x10, 0x10));
+                                       t_rgb->r, t_rgb->g, t_rgb->b));
     packet2_update(packet2, draw_enable_tests(packet2->next, 0, t_zBuffer));
     packet2_update(packet2, draw_finish(packet2->next));
     packet2_chain_close_tag(packet2);
@@ -118,14 +118,14 @@ void GifSender::sendPacket()
 }
 
 /** Adds clear screen to current packet */
-void GifSender::addClear(zbuffer_t *t_zBuffer)
+void GifSender::addClear(zbuffer_t *t_zBuffer, color_t *t_rgb)
 {
     packet2_chain_open_cnt(currentPacket, 0, 0, 0);
     packet2_update(currentPacket, draw_disable_tests(currentPacket->next, 0, t_zBuffer));
     packet2_update(currentPacket, draw_clear(currentPacket->next, 0,
                                              2048.0F - (screen->width / 2), 2048.0F - (screen->height / 2),
                                              screen->width, screen->height,
-                                             0x10, 0x10, 0x10));
+                                             t_rgb->r, t_rgb->g, t_rgb->b));
     packet2_update(currentPacket, draw_enable_tests(currentPacket->next, 0, t_zBuffer));
     packet2_chain_close_tag(currentPacket);
 }
@@ -181,7 +181,7 @@ void GifSender::calc3DObject(Matrix t_perspective, Mesh &t_mesh, u32 vertexCount
 
     if (SHOULD_BE_LIGHTED)
     {
-        const u16 lightsCount = Light::getLightsCount(t_bulbsCount);
+        const u16 lightsCount = light->getLightsCount(t_bulbsCount);
         VECTOR *lightDirections = new VECTOR[lightsCount];
         VECTOR *lightColors = new VECTOR[lightsCount];
         int *lightTypes = new int[lightsCount];
@@ -189,16 +189,16 @@ void GifSender::calc3DObject(Matrix t_perspective, Mesh &t_mesh, u32 vertexCount
         VECTOR *lights = new VECTOR[vertexCount];
         calculate_normals(normals, vertexCount, normals, localLight);
 
-        Light::calculateLight(lightDirections, lightColors, lightTypes, t_bulbs, t_bulbsCount, t_mesh.position);
+        light->calculateLight(lightDirections, lightColors, lightTypes, t_bulbs, lightsCount, t_mesh.position);
 
         calculate_lights(lights, vertexCount, normals, lightDirections, lightColors, lightTypes, lightsCount);
 
         for (u32 i = 0; i < vertexCount; i++)
         {
             // Apply the light value to the colour.
-            colors[i][0] = (t_mesh.color.r * lights[i][0] / 128.0F);
-            colors[i][1] = (t_mesh.color.g * lights[i][1] / 128.0F);
-            colors[i][2] = (t_mesh.color.b * lights[i][2] / 128.0F);
+            colors[i][0] = (t_mesh.color.r * lights[i][0]);
+            colors[i][1] = (t_mesh.color.g * lights[i][1]);
+            colors[i][2] = (t_mesh.color.b * lights[i][2]);
             vector_clamp(colors[i], colors[i], 0.00F, 1.99F);
         }
 
