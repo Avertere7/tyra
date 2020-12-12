@@ -13,6 +13,7 @@
 
 #include <tamtypes.h>
 #include <math3d.h>
+#include <math.h>
 #include "../models/math/vector3.hpp"
 
 class Vector3; // Forward definition
@@ -29,7 +30,7 @@ public:
     constexpr static float HALF_PI = 1.5707963267948966192313216916398F;
     static float cos(float x);
     static inline float sin(float x) { return cos(x - HALF_PI); };
-    static float sqrt(float x);
+    inline static float sqrt(const float &x) { return sqrtf(x); };
     static float invSqrt(float x);
 
 private:

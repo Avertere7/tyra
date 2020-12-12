@@ -72,16 +72,6 @@ float Math::cos(float x)
     return r;
 }
 
-float Math::sqrt(float x)
-{
-    float r;
-    __asm__ volatile(
-        "sqrt.s %0, %1 \n\t"
-        : "=&f"(r)
-        : "f"(x));
-    return r;
-}
-
 float Math::invSqrt(float x) { return 1.0F / sqrt(x); }
 
 /** Converts Vector3 to PS2SDK's Vector4 */
